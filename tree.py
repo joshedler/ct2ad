@@ -5,6 +5,8 @@ Examine a CherryTree SQLite database and print out the tree in proper heirarchic
 '''
 
 import argparse
+import colorama
+from colorama import Fore, Back, Style
 import sqlite3
 
 def sql_get_tables(con):
@@ -91,6 +93,24 @@ def get_node_name(node):
     '''
     return node[1]
 
+def get_node_id(node):
+    '''
+    Returns the node_id field from a node tuple (node_id, name, txt)
+
+    :param node: a node tuple (node_id, name, txt)
+    :return: returns the node_id field
+    '''
+    return node[0]
+
+def print_node(node, level):
+    '''
+    Print the node information to the console in a nice format
+    '''
+    indent = '--' * level
+    s = node['seq']
+    n = node['node']
+    print(f'{Style.DIM}|{indent} {Style.NORMAL}{s:03}: {Style.BRIGHT+Fore.YELLOW}\'{get_node_name(n)}\' {Fore.RESET}{Style.DIM}: [node_id = {get_node_id(n)}]')
+
 def dig(father, all_children, all_nodes, level):
     '''
     Given a father, recursively dig through the children, printing out
@@ -102,7 +122,6 @@ def dig(father, all_children, all_nodes, level):
     :level: an integer, beginning with 1, representing the indent level for nice output
     :return: returns a count of nodes discovered
     '''
-    indent = '--' * level
     father_id = father['node'][0]
 
     children = list(filter(lambda c: c[1] == father_id, all_children))
@@ -116,7 +135,7 @@ def dig(father, all_children, all_nodes, level):
     count = 0
     for node in sorted(nodes, key=sequence_order):
         count = count + 1
-        print(f'|{indent} {node["seq"]:03}: {get_node_name(node["node"])}')
+        print_node(node, level)
 
         count = count + dig(node, all_children, all_nodes, level+1)
 
@@ -134,6 +153,8 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('sqlite3_db', action='store')
 
 args = parser.parse_args()
+
+colorama.init(autoreset=True)
 
 # load the database and party on!
 con = sqlite3.connect(args.sqlite3_db)
@@ -159,7 +180,7 @@ count = 0
 
 for root in sorted(roots, key=sequence_order):
     count = count + 1
-    print(f'| {root["seq"]:03}: {get_node_name(root["node"])}')
+    print_node(root, 0)
 
     count = count + dig(root, all_children, all_nodes, 1)
 
