@@ -5,3 +5,4 @@ Interim iterations are to understand / reverse engineer the CherryTree database 
 
 ### Files:
 * tree.py : print out the tree from a CherryTree database in proper heirarchical and sequential order.
+* export.py : export a single node, entire branch, or all nodes from a CherryTree database.
